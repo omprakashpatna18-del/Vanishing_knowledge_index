@@ -37,9 +37,9 @@ async def search_and_display(keywords):
 @app.get("/retrieval")
 async def data_retrieval(selected):
     science_check=data["science_check"]
-    if data["region"]:
-      region=data["region"]
-    proof=data["source_link"]
+    region=data["region"]
+    if data["source_link"]:
+      proof=data["source_link"]
     info=data["info"]
     return { "Practice_name":selected,
         "Region":region,
