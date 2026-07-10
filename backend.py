@@ -4,10 +4,10 @@ data=pd.read_csv(https://github.com/omprakashpatna18-del/Vanishing_knowledge_ind
 app=FastAPI()
 #pulling out data
 categories=list(data["category"].str.strip().unique())
-practice
-@app.post("/search")
-def search_and_display(keywords):
-    keywords=keywords.split()
+practice=list(data['practice_name'].str.strip().unique())
+@app.get("/search")
+async def search_and_display(keywords):
+  keywords=keywords.split()
   req_cat=None
   for cat in catgories:
     if any(word in keywords) in cat:
@@ -16,7 +16,21 @@ def search_and_display(keywords):
       break
   if req_cat not None:
     options=data[data["category"]==req_cat].practice_name
-  for
+  for prac in practice:
+    if any(word in keywords) in prac:
+        print("Practice found")
+        req_cat=prac
+        break
+  if req_cat not None:
+    options=data["practice_name"]
+  else:
+    options=None
+  return {"Options":options}
+@app.get("/retrieval")
+async def data_retrieval(selected):
+    
+
+
              
      
 
