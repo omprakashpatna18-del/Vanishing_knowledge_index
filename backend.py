@@ -11,11 +11,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 #pulling out data
-categories=list(data["category"].str.strip().unique())
-practice=list(data['practice_name'].str.strip().unique())
+categories=list(ata["category"].str.strip().str.lower().unique())
+practice=list(data['practice_name'].str.strip().str.lower().unique())
 @app.get("/search")
 async def search_and_display(keywords):
-  keywords=keywords.split()
+  keywords=keywords.lower().split()
   req_cat=None
   for cat in catgories:
     if any(word in keywords) in cat:
@@ -24,6 +24,7 @@ async def search_and_display(keywords):
       break
   if req_cat not None:
     options=data[data["category"]==req_cat].practice_name
+    return {"Options":options}
   for prac in practice:
     if any(word in keywords) in prac:
         print("Practice found")
@@ -31,20 +32,29 @@ async def search_and_display(keywords):
         break
   if req_cat not None:
     options=data["practice_name"]
-  else:
-    options=None
-  return {"Options":options}
+    return {"Options":options}
+ 
+  return {"Options":[]}
 @app.get("/retrieval")
 async def data_retrieval(selected):
-    science_check=data["science_check"]
-    region=data["region"]
-    if data["source_link"]:
-      proof=data["source_link"]
-    info=data["info"]
+    matched_data = data[data["practice_name"].str.lower() == selected.lower()]
+    
+    if matched_data.empty:
+        raise HTTPException(status_code=404, detail="Selected practice information not found.")
+        
+    row = matched_data.iloc[0].to_dict()
+    science_check=row.get("science_check")
+    region=row.get("region","Unknown")
+    proof=row.get("source_link","None")
+    info=row.get("info")
+    latitude=row.get("latitude")
+    longitude=row.get("longitude")
     return { "Practice_name":selected,
         "Region":region,
         "Information":info,
-        "Proof":data
+        "Proof":data,
+        "latitude":latitude,
+        "longitude":longitude
         }
         
     
