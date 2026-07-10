@@ -28,6 +28,18 @@ async def search_and_display(keywords):
   return {"Options":options}
 @app.get("/retrieval")
 async def data_retrieval(selected):
+    science_check=data["science_check"]
+    if data["region"]:
+      region=data["region"]
+    proof=data["source_link"]
+    info=data["info"]
+    return { "Practice_name":selected,
+        "Region":region,
+        "Information":info,
+        "Proof":data
+        }
+        
+    
     
 
 
