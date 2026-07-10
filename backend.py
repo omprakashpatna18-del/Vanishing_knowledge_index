@@ -1,7 +1,7 @@
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-data=pd.read_csv(https://github.com/omprakashpatna18-del/Vanishing_knowledge_index/blob/main/Vanishing_Knowledge_Index_Dataset%20(2).csv")
+data=pd.read_csv("https://github.com/omprakashpatna18-del/Vanishing_knowledge_index/blob/da2cc3e9c110d69a84732251977338dc3d5243c2/Vanishing_Knowledge_Index_Dataset%20(2).csv")
 app=FastAPI()
 app.add_middleware(
     CORSMiddleware,
