@@ -1,7 +1,15 @@
 import pandas as pd
-import fastapi as FastAPI
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 data=pd.read_csv(https://github.com/omprakashpatna18-del/Vanishing_knowledge_index/blob/main/Vanishing_Knowledge_Index_Dataset%20(2).csv")
 app=FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 #pulling out data
 categories=list(data["category"].str.strip().unique())
 practice=list(data['practice_name'].str.strip().unique())
