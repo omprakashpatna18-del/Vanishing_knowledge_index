@@ -14,7 +14,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-#pulling out data
+#--------searching--------#
 categories=list(ata["category"].str.strip().str.lower().unique())
 practice=list(data['practice_name'].str.strip().str.lower().unique())
 @app.get("/search")
@@ -39,6 +39,7 @@ async def search_and_display(keywords):
     return {"Options":options}
  
   return {"Options":[]}
+#------Retrieval-----#
 @app.get("/retrieval")
 async def data_retrieval(selected):
     matched_data = data[data["practice_name"].str.lower() == selected.lower()]
@@ -120,11 +121,9 @@ async def upload(data):
        return {"message":"Upload Successful"}
 except Exception as e:
        print(e)
-       raise HTTPException(status_code=500,detail="Failed to process files."
+       raise HTTPException(status_code=500,detail="Failed to process files.")
 
-from fastapi import Form
-
-
+#-----Authentication------#
 ADMIN_USER = "admin123"
 ADMIN_PASS = "securepassword"
 
