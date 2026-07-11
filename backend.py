@@ -82,31 +82,60 @@ def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
             detail="Invalid Administrative Authentication Token"
         )
     return True
-#-------Validation------------#
-class Data(BaseModel):
-    practice_name: str,
-    category: str,
-    region: str,
-    science_check: str,
-    notes: str,
-    source_link: str,
-    media_file: file: UploadFile = File(...)
 #--------User Submission------#
 @app.post("/upload")
-async def upload(data: Data):
-    practice_name=data.practice_name
-    category=data.category
-    region=data.region
-    science_check=data.science_check
-    notes=data.notes
-    source_link: data.source_link
-    media_file: data.media_file
+async def upload(data):
+    practice_name: str = Form(...),
+    category: str = Form(...),
+    region: str = Form(...),
+    science_check: str = Form(...),
+    notes: str = Form(...),
+    source_link: str = Form(""),       
+    latitude: float = Form(...),
+    longitude: float = Form(...),
+    media_file: UploadFile = File(...)  
+):
     try:
         if media_file.content_type not in ALLOWED_MIME_TYPES:
             raise HTTPException(status_code=400, detail="Invalid media type. Standard Audio/Video files only.")
         safe_filename = secure_filename(media_file.filename)
         file_path = os.path.join(MEDIA_DIR, safe_filename)
-    
+        with open(filepath,'wb') as f:
+            while chunk:=await media_file.read(1024*1024):
+                f.write(chunk)
+        new_row = {
+            "category": category,
+            "practice_name": practice_name,
+            "region": region,
+            "science_check": science_check,
+            "info": notes if notes else "",
+            "source_link": source_link if source_link else "",
+            "latitude":latitude,
+            "longitude":longitude,
+            "media_asset": safe_filename
+        }
+        
+        pending_df = pd.concat([pending_df, pd.DataFrame([new_row])], ignore_index=True)
+        pending_df.to_csv(PENDING_CSV_PATH, index=False)
+       return {"message":"Upload Successful"}
+except Exception as e:
+       print(e)
+       raise HTTPException(status_code=500,detail="Failed to process files."
+
+from fastapi import Form
+
+
+ADMIN_USER = "admin123"
+ADMIN_PASS = "securepassword"
+
+@app.post("login")
+async def admin_login(username: str = Form(...), password: str = Form(...)):
+    if username == DUMMY_ADMIN_USER and password == DUMMY_ADMIN_PASS:
+        return {"status": "success", "token": ADMIN_TOKEN}
+    else:
+        raise HTTPException(status_code=400, detail="Invalid username or password")
+
+
     
     
     
