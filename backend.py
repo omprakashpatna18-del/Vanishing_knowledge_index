@@ -94,13 +94,19 @@ class Data(BaseModel):
 #--------User Submission------#
 @app.post("/upload")
 async def upload(data: Data):
-    practice_name=data.
-    category: str,
-    region: str,
-    science_check: str,
-    i: str,
-    source_link: str,
-    media_file: file: UploadFile = File(...)
+    practice_name=data.practice_name
+    category=data.category
+    region=data.region
+    science_check=data.science_check
+    notes=data.notes
+    source_link: data.source_link
+    media_file: data.media_file
+    try:
+        if media_file.content_type not in ALLOWED_MIME_TYPES:
+            raise HTTPException(status_code=400, detail="Invalid media type. Standard Audio/Video files only.")
+        safe_filename = secure_filename(media_file.filename)
+        file_path = os.path.join(MEDIA_DIR, safe_filename)
+    
     
     
     
