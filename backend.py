@@ -87,11 +87,24 @@ class Data(BaseModel):
     practice_name: str,
     category: str,
     region: str,
-    info: str,
-    source_link: file: UploadFile = File(...)
+    science_check: str,
+    notes: str,
+    source_link: str,
+    media_file: file: UploadFile = File(...)
 #--------User Submission------#
 @app.post("/upload")
 async def upload(data: Data):
+    practice_name=data.
+    category: str,
+    region: str,
+    science_check: str,
+    i: str,
+    source_link: str,
+    media_file: file: UploadFile = File(...)
+    
+    
+    
+    
     
 
 
