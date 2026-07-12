@@ -23,19 +23,19 @@ async def search_and_display(keywords):
   keywords=keywords.lower().split()
   req_cat=None
   for cat in categories:
-    if any(word in keywords) in cat:
+    if any(word in cat for word in keywords):
       print("category found")
       req_cat=cat
       break
-  if req_cat not None:
+  if not req_cat:
     options=data[data["category"]==req_cat].practice_name
     return {"Options":options}
   for prac in practice:
-    if any(word in keywords) in prac:
+    if any(word in prac for word in keywords):
         print("Practice found")
         req_cat=prac
         break
-  if req_cat not None:
+  if not req_cat:
     options=data["practice_name"]
     return {"Options":options}
  
@@ -115,7 +115,7 @@ async def upload(data):
             "longitude":longitude,
             "media_asset": safe_filename
         }
-        
+        pending_df = pd.read_csv(PENDING_CSV_PATH)
         pending_df = pd.concat([pending_df, pd.DataFrame([new_row])], ignore_index=True)
         pending_df.to_csv(PENDING_CSV_PATH, index=False)
        return {"message":"Upload Successful"}
