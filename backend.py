@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from pydantic import BaseModel
-from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, HTTPException, Depends,status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import pandas as pd
@@ -27,7 +27,7 @@ async def search_and_display(keywords):
       print("category found")
       req_cat=cat
       break
-  if not req_cat:
+  if req_cat:
     options=data[data["category"]==req_cat].practice_name
     return {"Options":options}
   for prac in practice:
@@ -35,7 +35,7 @@ async def search_and_display(keywords):
         print("Practice found")
         req_cat=prac
         break
-  if not req_cat:
+  if req_cat:
     options=data["practice_name"]
     return {"Options":options}
  
@@ -86,16 +86,16 @@ def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
     return True
 #--------User Submission------#
 @app.post("/upload")
-async def upload(data):
+async def upload(
     practice_name: str = Form(...),
     category: str = Form(...),
     region: str = Form(...),
-    science_check: str = Form(...),
+    science_check: str = Form(""),
     notes: str = Form(...),
     source_link: str = Form(""),       
-    latitude: float = Form(...),
-    longitude: float = Form(...),
-    media_file: UploadFile = File(...)  
+    latitude: float = Form(None),
+    longitude: float = Form(None),
+    media_file: UploadFile = File(...) ): 
     try:
         if media_file.content_type not in ALLOWED_MIME_TYPES:
             raise HTTPException(status_code=400, detail="Invalid media type. Standard Audio/Video files only.")
@@ -119,7 +119,7 @@ async def upload(data):
         pending_df = pd.concat([pending_df, pd.DataFrame([new_row])], ignore_index=True)
         pending_df.to_csv(PENDING_CSV_PATH, index=False)
        return {"message":"Upload Successful"}
-except Exception as e:
+  except Exception as e:
        print(e)
        raise HTTPException(status_code=500,detail="Failed to process files.")
 
