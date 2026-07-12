@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import pandas as pd
 from werkzeug.utils import secure_filename
-data=pd.read_csv("https://github.com/omprakashpatna18-del/Vanishing_knowledge_index/blob/da2cc3e9c110d69a84732251977338dc3d5243c2/Vanishing_Knowledge_Index_Dataset%20(2).csv")
+data=pd.read_csv("Vanishing_Knowledge_Index_Dataset%20(2).csv")
 app=FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -58,7 +58,7 @@ async def data_retrieval(selected):
     return { "Practice_name":selected,
         "Region":region,
         "Information":info,
-        "Proof":data,
+        "Proof":proof,
         "latitude":latitude,
         "longitude":longitude
         }
@@ -101,7 +101,7 @@ async def upload(
             raise HTTPException(status_code=400, detail="Invalid media type. Standard Audio/Video files only.")
         safe_filename = secure_filename(media_file.filename)
         file_path = os.path.join(MEDIA_DIR, safe_filename)
-        with open(filepath,'wb') as f:
+        with open(file_path,'wb') as f:
             while chunk:=await media_file.read(1024*1024):
                 f.write(chunk)
         new_row = {
