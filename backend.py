@@ -7,7 +7,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import pandas as pd
 from werkzeug.utils import secure_filename
 data=pd.read_csv("Vanishing_Knowledge_Index_Dataset%20(2).csv")
-app=FastAPI()
+app=FastAPI(title="Vanishing knowledge index")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -37,7 +37,7 @@ async def search_and_display(keywords):
         break
   if req_cat:
     options=data["practice_name"]
-    return {"Options":options}
+    return {"Options":[options]}
  
   return {"Options":[]}
 #------Retrieval-----#
@@ -52,7 +52,7 @@ async def data_retrieval(selected):
     science_check=row.get("science_check")
     region=row.get("region","Unknown")
     proof=row.get("source_link","None")
-    info=row.get("info")
+    info=row.get("notes")
     latitude=row.get("latitude")
     longitude=row.get("longitude")
     return { "Practice_name":selected,
@@ -69,7 +69,7 @@ PENDING_CSV_PATH = "pending_submissions.csv"
 
 for folder in [MEDIA_DIR]:
     os.makedirs(folder, exist_ok=True)
-columns = ["category", "practice_name", "region", "info", "science_check", "source_link", "media_asset"]
+columns = ["category", "practice_name", "region", "info", "science_check", "source_link", "media_file","latitude","longitude"]
 for path in [LIVE_CSV_PATH,PENDING_CSV_PATH]:
     if not os.path.exists(path):
         pd.DataFrame(columns=columns).to_csv(path,index=False)
