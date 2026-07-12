@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,13 +16,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 #--------searching--------#
-categories=list(ata["category"].str.strip().str.lower().unique())
+categories=list(data["category"].str.strip().str.lower().unique())
 practice=list(data['practice_name'].str.strip().str.lower().unique())
 @app.get("/search")
 async def search_and_display(keywords):
   keywords=keywords.lower().split()
   req_cat=None
-  for cat in catgories:
+  for cat in categories:
     if any(word in keywords) in cat:
       print("category found")
       req_cat=cat
@@ -78,7 +79,7 @@ ADMIN_TOKEN = "SuperSecretAdminKey123"
 ALLOWED_MIME_TYPES = ["audio/mpeg", "audio/wav", "audio/x-wav", "audio/ogg", "video/mp4", "video/webm"]
 
 def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    if creditionals.creditionals!=ADMIN_TOKEN:
+    if credentionals.credentionals!=ADMIN_TOKEN:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid Administrative Authentication Token"
         )
@@ -95,7 +96,6 @@ async def upload(data):
     latitude: float = Form(...),
     longitude: float = Form(...),
     media_file: UploadFile = File(...)  
-):
     try:
         if media_file.content_type not in ALLOWED_MIME_TYPES:
             raise HTTPException(status_code=400, detail="Invalid media type. Standard Audio/Video files only.")
@@ -127,9 +127,9 @@ except Exception as e:
 ADMIN_USER = "admin123"
 ADMIN_PASS = "securepassword"
 
-@app.post("login")
+@app.post("/login")
 async def admin_login(username: str = Form(...), password: str = Form(...)):
-    if username == DUMMY_ADMIN_USER and password == DUMMY_ADMIN_PASS:
+    if username == ADMIN_USER and password == ADMIN_PASS:
         return {"status": "success", "token": ADMIN_TOKEN}
     else:
         raise HTTPException(status_code=400, detail="Invalid username or password")
