@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from pydantic import BaseModel
+from geopy.geocoders import Nominatim
 from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, HTTPException, Depends,status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -85,6 +86,7 @@ def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
         )
     return True
 #--------User Submission------#
+geolocator = Nominatim(user_agent="my_unique_app_name_123")
 @app.post("/upload")
 async def upload(
     practice_name: str = Form(...),
@@ -97,6 +99,11 @@ async def upload(
     longitude: float = Form(None),
     media_file: UploadFile = File(...) ): 
     try:
+        if not latitude or not longitude:
+            location = geolocator.geocode(region)
+            latitude=location.latitude
+            longitude=location.longitude
+       
         if media_file.content_type not in ALLOWED_MIME_TYPES:
             raise HTTPException(status_code=400, detail="Invalid media type. Standard Audio/Video files only.")
         safe_filename = secure_filename(media_file.filename)
@@ -111,8 +118,8 @@ async def upload(
             "science_check": science_check,
             "info": notes if notes else "",
             "source_link": source_link if source_link else "",
-            "latitude":latitude,
-            "longitude":longitude,
+            "latitude":latitude if latitude else "",
+            "longitude":longitude if longitude else "",
             "media_asset": safe_filename
         }
         pending_df = pd.read_csv(PENDING_CSV_PATH)
