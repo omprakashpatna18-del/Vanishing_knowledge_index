@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import pandas as pd
 from werkzeug.utils import secure_filename
-data=pd.read_csv("Vanishing_Knowledge_Index_Dataset%20(2).csv")
+data=pd.read_csv("Vanishing_Knowledge_Index_Dataset(2).csv")
 app=FastAPI(title="Vanishing knowledge index")
 app.add_middleware(
     CORSMiddleware,
@@ -65,7 +65,7 @@ async def data_retrieval(selected):
         }
 #_-------adding files-----------#
 MEDIA_DIR = "./uploaded_media"
-LIVE_CSV_PATH = "live_dataset.csv"
+LIVE_CSV_PATH = "Vanishing_Knowledge_Index_Dataset(2).csv"
 PENDING_CSV_PATH = "pending_submissions.csv"
 
 for folder in [MEDIA_DIR]:
@@ -80,7 +80,7 @@ ADMIN_TOKEN = "SuperSecretAdminKey123"
 ALLOWED_MIME_TYPES = ["audio/mpeg", "audio/wav", "audio/x-wav", "audio/ogg", "video/mp4", "video/webm"]
 
 def verify_admin(credentials: HTTPAuthorizationCredentials = Depends(security)):
-    if credentionals.credentionals!=ADMIN_TOKEN:
+    if credentials.credentials!=ADMIN_TOKEN:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid Administrative Authentication Token"
         )
@@ -120,7 +120,7 @@ async def upload(
             "source_link": source_link if source_link else "",
             "latitude":latitude if latitude else "",
             "longitude":longitude if longitude else "",
-            "media_asset": safe_filename
+            "media_file": safe_filename
         }
         pending_df = pd.read_csv(PENDING_CSV_PATH)
         pending_df = pd.concat([pending_df, pd.DataFrame([new_row])], ignore_index=True)
@@ -140,6 +140,26 @@ async def admin_login(username: str = Form(...), password: str = Form(...)):
         return {"status": "success", "token": ADMIN_TOKEN}
     else:
         raise HTTPException(status_code=400, detail="Invalid username or password")
+pending_df=pd.read_csv(PENDING_CSV_PATH)
+@app.get("/admin/pending", dependencies=[Depends(verify_admin)])
+async def check_submissioons():
+    pending_df=pd.read_csv(PENDING_CSV_PATH)
+    live_df=pd.read_csv(LIVE_CSV_PATH)
+    if not pending_df.empty():
+        return{"Pending submissions":pending_df.to_dict(orient="records")}
+
+@app.get("admin/approve",dependencies=[Depends(verify_admin)])
+async def approv():
+    try:
+      live_df=pd.concat([live_df,pending_df], ignore_index=True)
+      live_df.to_csv("Vanishing_Knowledge_Index_Dataset(2).csv")
+      return{"Upload successful"}
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Upload not successful.")
+        
+    
+
 
 
     
