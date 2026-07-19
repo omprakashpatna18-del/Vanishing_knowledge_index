@@ -141,18 +141,18 @@ async def admin_login(username: str = Form(...), password: str = Form(...)):
     else:
         raise HTTPException(status_code=400, detail="Invalid username or password")
 pending_df=pd.read_csv(PENDING_CSV_PATH)
+live_df=pd.read_csv(LIVE_CSV_PATH)
 @app.get("/admin/pending", dependencies=[Depends(verify_admin)])
 async def check_submissioons():
-    pending_df=pd.read_csv(PENDING_CSV_PATH)
-    live_df=pd.read_csv(LIVE_CSV_PATH)
     if not pending_df.empty():
         return{"Pending submissions":pending_df.to_dict(orient="records")}
 
-@app.get("admin/approve",dependencies=[Depends(verify_admin)])
+@app.post("admin/approve",dependencies=[Depends(verify_admin)])
 async def approv():
     try:
       live_df=pd.concat([live_df,pending_df], ignore_index=True)
       live_df.to_csv("Vanishing_Knowledge_Index_Dataset(2).csv")
+      pending_df=pd.DataFrame(columns=columns)
       return{"Upload successful"}
     except Exception as e:
         print(e)
