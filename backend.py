@@ -41,7 +41,7 @@ async def search_and_display(keyword):
   if req_cat:
     options=data["practice_name"]
     return {"Options":[options]}
-  word=pd.DataFrame(data=[keywords],columns=["practice_name"])
+  word=pd.DataFrame(data=[keyword],columns=["practice_name"])
   if max(model.predict_proba(word)[0])>0.4:
       req_cat=model.predict(word)[0]
       options=data[data["category"]==req_cat].practice_name
@@ -164,7 +164,8 @@ async def approv():
       live_df=pd.concat([live_df,pending_df], ignore_index=True)
       live_df.to_csv("Vanishing_Knowledge_Index_Dataset(2).csv")
       pending_df=pd.DataFrame(columns=columns)
-      return{"Upload successful"}
+      pd.DataFrame(columns=columns).to_csv(PENDING_CSV_PATH, index=False)
+      return{message:"Upload successful"}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail="Upload not successful.")
