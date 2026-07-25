@@ -165,7 +165,7 @@ async def approv():
       live_df.to_csv("Vanishing_Knowledge_Index_Dataset(2).csv")
       pending_df=pd.DataFrame(columns=columns)
       pd.DataFrame(columns=columns).to_csv(PENDING_CSV_PATH, index=False)
-      return{message:"Upload successful"}
+      return{"message":"Upload successful"}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail="Upload not successful.")
