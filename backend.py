@@ -7,7 +7,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import pandas as pd
 from werkzeug.utils import secure_filename
+import joblib
 data=pd.read_csv("Vanishing_Knowledge_Index_Dataset(2).csv")
+model=joblib.load("search")
 app=FastAPI(title="Vanishing knowledge index")
 app.add_middleware(
     CORSMiddleware,
@@ -39,7 +41,11 @@ async def search_and_display(keywords):
   if req_cat:
     options=data["practice_name"]
     return {"Options":[options]}
- 
+  word=keywords.lower()
+  if model.predict_proba(word)>.4:
+      req_cat=model.predict(word)
+       options=data[data["category"]==req_cat].practice_name
+    return {"Options":options}
   return {"Options":[]}
 #------Retrieval-----#
 @app.get("/retrieval")
