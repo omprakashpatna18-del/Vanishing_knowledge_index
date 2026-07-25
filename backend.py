@@ -41,8 +41,8 @@ async def search_and_display(keyword):
   if req_cat:
     options=data["practice_name"]
     return {"Options":[options]}
-  word=pd.DataFrame("practice_name":keywords)
-  if model.predict_proba(word)[0]>0.4:
+  word=pd.DataFrame(data=[keywords],columns=["practice_name"])
+  if max(model.predict_proba(word)[0])>0.4:
       req_cat=model.predict(word)[0]
       options=data[data["category"]==req_cat].practice_name
       return {"Options":options}
@@ -60,8 +60,8 @@ async def data_retrieval(selected):
     region=row.get("region","Unknown")
     proof=row.get("source_link","None")
     info=row.get("notes","")
-    latitude=row.get("latitude","")
-    longitude=row.get("longitude","")
+    latitude=row.get("latitude",None)
+    longitude=row.get("longitude",None)
     return { "Practice_name":selected,
         "Region":region,
         "Information":info,
@@ -107,9 +107,11 @@ async def upload(
     try:
         if not latitude or not longitude:
             location = geolocator.geocode(region)
-            latitude=location.latitude
-            longitude=location.longitude
-       
+            if location:
+                latitude=location.latitude
+                longitude=location.longitude
+            else:
+                latitude,longitude=None,None
         if media_file.content_type not in ALLOWED_MIME_TYPES:
             raise HTTPException(status_code=400, detail="Invalid media type. Standard Audio/Video files only.")
         safe_filename = secure_filename(media_file.filename)
@@ -146,16 +148,19 @@ async def admin_login(username: str = Form(...), password: str = Form(...)):
         return {"status": "success", "token": ADMIN_TOKEN}
     else:
         raise HTTPException(status_code=400, detail="Invalid username or password")
-pending_df=pd.read_csv(PENDING_CSV_PATH)
-live_df=pd.read_csv(LIVE_CSV_PATH)
+
+
 @app.get("/admin/pending", dependencies=[Depends(verify_admin)])
 async def check_submissioons():
+    pending_df=pd.read_csv(PENDING_CSV_PATH)
     if not pending_df.empty:
         return{"Pending submissions":pending_df.to_dict(orient="records")}
 
 @app.post("/admin/approve",dependencies=[Depends(verify_admin)])
 async def approv():
     try:
+      live_df=pd.read_csv(LIVE_CSV_PATH)
+      pending_df=pd.read_csv(PENDING_CSV_PATH)
       live_df=pd.concat([live_df,pending_df], ignore_index=True)
       live_df.to_csv("Vanishing_Knowledge_Index_Dataset(2).csv")
       pending_df=pd.DataFrame(columns=columns)
