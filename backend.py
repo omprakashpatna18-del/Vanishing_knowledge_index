@@ -42,10 +42,10 @@ async def search_and_display(keywords):
     options=data["practice_name"]
     return {"Options":[options]}
   word=keywords.lower()
-  if model.predict_proba(word)>.4:
+  if model.predict_proba(word)>0.4:
       req_cat=model.predict(word)
-       options=data[data["category"]==req_cat].practice_name
-    return {"Options":options}
+      options=data[data["category"]==req_cat].practice_name
+      return {"Options":options}
   return {"Options":[]}
 #------Retrieval-----#
 @app.get("/retrieval")
