@@ -22,8 +22,8 @@ app.add_middleware(
 categories=list(data["category"].str.strip().str.lower().unique())
 practice=list(data['practice_name'].str.strip().str.lower().unique())
 @app.get("/search")
-async def search_and_display(keywords):
-  keywords=keywords.lower().split()
+async def search_and_display(keyword):
+  keywords=keyword.lower().split()
   req_cat=None
   for cat in categories:
     if any(word in cat for word in keywords):
@@ -41,9 +41,9 @@ async def search_and_display(keywords):
   if req_cat:
     options=data["practice_name"]
     return {"Options":[options]}
-  word=keywords.lower()
-  if model.predict_proba(word)>0.4:
-      req_cat=model.predict(word)
+  word=pd.DataFrame("practice_name":keywords)
+  if model.predict_proba(word)[0]>0.4:
+      req_cat=model.predict(word)[0]
       options=data[data["category"]==req_cat].practice_name
       return {"Options":options}
   return {"Options":[]}
@@ -56,12 +56,12 @@ async def data_retrieval(selected):
         raise HTTPException(status_code=404, detail="Selected practice information not found.")
         
     row = matched_data.iloc[0].to_dict()
-    science_check=row.get("science_check")
+    science_check=row.get("science_check","")
     region=row.get("region","Unknown")
     proof=row.get("source_link","None")
-    info=row.get("notes")
-    latitude=row.get("latitude")
-    longitude=row.get("longitude")
+    info=row.get("notes","")
+    latitude=row.get("latitude","")
+    longitude=row.get("longitude","")
     return { "Practice_name":selected,
         "Region":region,
         "Information":info,
@@ -150,10 +150,10 @@ pending_df=pd.read_csv(PENDING_CSV_PATH)
 live_df=pd.read_csv(LIVE_CSV_PATH)
 @app.get("/admin/pending", dependencies=[Depends(verify_admin)])
 async def check_submissioons():
-    if not pending_df.empty():
+    if not pending_df.empty:
         return{"Pending submissions":pending_df.to_dict(orient="records")}
 
-@app.post("admin/approve",dependencies=[Depends(verify_admin)])
+@app.post("/admin/approve",dependencies=[Depends(verify_admin)])
 async def approv():
     try:
       live_df=pd.concat([live_df,pending_df], ignore_index=True)
